@@ -11,23 +11,26 @@ html {
 body {
     display: flex;
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
+    height: 100%;
+    background: #eee
 }
 
 section {
-    width: 25%;
+    width: 25vw;
     display: flex;
     flex-direction: column;
 }
 
-section>h1{
+section:nth-of-type(even) {
+    background: #DDD;
+}
+
+section>h1 {
     text-align: center;
     font-size: 3rem;
     font-weight: 2rem;
-}
-
-section:nth-of-type(even) {
-    background: #EEE;
+    margin-bottom: 3rem;
 }
 
 #addForm {
@@ -44,4 +47,32 @@ section:nth-of-type(even) {
 #addForm>label>input:not(.radio) {
     width: 20rem;
 
+}
+
+.albumArt {
+    width: 22vw;
+    background: #DDD;
+    padding: 1rem 1.5vw;
+}
+
+.albumArt:nth-of-type(odd) {
+    background: #EEE;
+}
+
+.albumRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+}
+
+.cover {
+    width: 5rem;
+    height: 5rem;
+}
+
+.coverImg {
+    width: 100%;
+    height: 100%;
 }

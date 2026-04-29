@@ -1,50 +1,98 @@
 <?php
 
 include_once "connection.php";
+include_once "api.php";
 
-if (!isset($_POST['itemAdd'])) {
-} else {
-    $media = $_GET['type'];
+session_start();
 
-    $sql = "INSERT INTO $media (`artist`,`album`)
-            VALUES 
-                artist = ?, 
-                album = ?"
-    ;
+if (isset($_POST['delete_id'])) {
+    $id_to_delete = $_POST['delete_id'];
+    $sql = "DELETE FROM media WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$id_to_delete]);
 
-    $add = $pdo->prepare($sql);
-    $add->execute([
-        $_POST['artist'],
-        $_POST['album'],
-    ]);
+    header("Location: index.php");
+    exit;
+}
+
+if (isset($_POST['itemAdd'])) {
+    $allowed = ['vinyl', 'cd', 'cassette'];
+    $media = $_POST['type'];
+
+    if (in_array($media, $allowed)) {
+        $coverUrl = getReleaseCoverArt($_POST['artist'], $_POST['album']);
+        if (!$coverUrl) { $coverUrl = "img.png"; }
+
+        $userId = $_SESSION['userID'] ?? null;
+
+        $sql = "INSERT INTO media (artist, album, type, cover_url, user_id) 
+                VALUES (?, ?, ?, ?, ?)";
+
+        $add = $pdo->prepare($sql);
+        $add->execute([
+            $_POST['artist'],
+            $_POST['album'],
+            $_POST['type'],
+            $coverUrl,
+            $userId
+        ]);
+
+        header("Location: index.php");
+        exit;
+    }
 }
 
 function query($pdo, $type)
 {
-    $params = [];
-    $where = "";
+    $userId = $_SESSION['userID'] ?? null;
 
-    if ($type !== NULL) {
-        $where = "WHERE shopitems.itemThemeID = ?";
+    if ($userId) {
+        $selectQuery = "SELECT id, artist, album, type, cover_url 
+                        FROM media 
+                        WHERE type = ? AND user_id = ? 
+                        ORDER BY artist ASC";
+        $params = [$type, $userId];
+    } else {
+        $selectQuery = "SELECT id, artist, album, type, cover_url 
+                        FROM media 
+                        WHERE type = ? AND user_id IS NULL 
+                        ORDER BY artist ASC";
         $params = [$type];
     }
 
-    $selectQuery = "SELECT  artist, 
-                            album, 
-                            
-                    FROM `$type`
-
-                    $where 
-                    ORDER BY artist ASC";
-
     $stmt = $pdo->prepare($selectQuery);
     $stmt->execute($params);
-    
-    itemArticle($stmt); 
+    album($stmt);
 }
 
 function album($stmt)
 {
+
+    while ($dbItem = $stmt->fetch()) {
+        $id = $dbItem["id"];
+        $artist = htmlspecialchars($dbItem["artist"]);
+        $album = htmlspecialchars($dbItem["album"]);
+        $image = htmlspecialchars($dbItem["cover_url"]);
+        ?>
+
+        <article class="albumArt">
+            <table>
+                <tr class="albumRow">
+                    <td class="cover"><img src="<?= $image ?>" alt="cover for <?= $album ?>" class="coverImg"></td>
+                    <td class="artist"><b><?= $artist ?></b></td>
+                    <td class="album"><?= $album ?></td>
+                    <td class="delete">
+                        <form method="post" onsubmit="return confirm('Delete this album from your collection?');">
+                            <input type="hidden" name="delete_id" value="<?= $id ?>">
+                            <button type="submit" class="btn-delete">x</button>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </article>
+
+        <?php
+    }
 }
 
 ?>
@@ -60,12 +108,20 @@ function album($stmt)
 
 <body>
     <section id="add">
+        <div>
+            <?php if (isset($_SESSION['loggedInUser'])): ?>
+                <p>Logged in as: <?= htmlspecialchars($_SESSION['loggedInUser']) ?>
+                    | <a href="logout.php">Logout</a></p>
+            <?php else: ?>
+                <p><a href="login.php">Login</a> to save your collection permanently.</p>
+            <?php endif; ?>
+        </div>
         <h1>add</h1>
-        <form method="get" id="addForm">
+        <form method="post" id="addForm">
             <label for="artist">artist
-                <input type="text" name="artist" /></label>
+                <input type="text" name="artist" required /></label>
             <label for="album">album
-                <input type="text" name="album" /></label>
+                <input type="text" name="album" required /></label>
             <label for="vinyl">
                 <input type="radio" class="radio" name="type" id="vinyl" value="vinyl">Vinyl</label>
             <label for="cd">
@@ -81,9 +137,11 @@ function album($stmt)
     </section>
     <section id="cds">
         <h1>cd's</h1>
+        <?php query($pdo, 'cd'); ?>
     </section>
     <section id="cassettes">
         <h1>cassettes</h1>
+        <?php query($pdo, 'cassette'); ?>
     </section>
 </body>
 
