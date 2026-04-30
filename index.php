@@ -127,7 +127,7 @@ function album($stmt)
             <label for="cd">
                 <input type="radio" class="radio" name="type" id="cd" value="cd">CD</label>
             <label for="cassette">
-                <input type="radio" class="radio" name="type" id="cassette" value="cassette">cassette</label>
+                <input type="radio" class="radio" name="type" id="cassette" value="cassette">Cassette</label>
             <input type="submit" name="itemAdd" value="Add to collection">
         </form>
     </section>

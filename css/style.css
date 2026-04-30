@@ -76,3 +76,71 @@ section>h1 {
     width: 100%;
     height: 100%;
 }
+
+@media only screen and (max-width: 600px) {
+    body { 
+        display: flex;
+        flex-direction: column; 
+        width: 100%;
+    }
+
+    section {
+        width: 100% !important;
+        display: block; 
+    }
+
+    #addForm {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #addForm input[type="text"], 
+    #addForm input[type="submit"] {
+        width: 100%;
+        margin-bottom: 15px;
+        padding: 12px; 
+    }
+
+    .albumArt {
+        margin: 10px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .albumArt table, 
+    .albumArt tbody, 
+    .albumArt tr {
+        display: block; 
+        width: 100%;
+    }
+
+    .albumRow {
+        display: flex;
+        flex-direction: column; 
+        align-items: center;
+        padding: 15px;
+    }
+
+    .coverImg {
+        width: 200px; 
+        height: 200px;
+        margin-bottom: 10px;
+    }
+
+    .delete {
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .btn-delete {
+        width: 100%;
+        padding: 12px;
+        background: #ffeded;
+        color: #d00;
+        border: 1px solid #ffcccc;
+        border-radius: 4px;
+    }
+}
